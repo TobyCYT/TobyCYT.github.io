@@ -2,84 +2,7 @@
 <html>
 <head>
     <title>Toby's Page</title>
-    <style>
-        html {
-            scroll-behavior: smooth;
-        }
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-        }
-        
-        header {
-            background-color: #333;
-            color: #fff;
-            padding: 20px;
-            text-align: center;
-        }
-        
-        nav ul {
-            list-style-type: none;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-        }
-        
-        nav ul li {
-            margin: 0 10px;
-        }
-        
-        nav ul li a {
-            color: #fff;
-            text-decoration: none;
-        }
-        
-        section {
-            padding: 50px;
-            text-align: center;
-        }
-        
-        footer {
-            background-color: #333;
-            color: #fff;
-            padding: 20px;
-            text-align: center;
-        }
-        
-        .sidebar {
-            background-color: #f1f1f1;
-            width: 200px;
-            padding: 20px;
-            position: fixed;
-            top: 0;
-            left: 0;
-            height: 100%;
-        }
-        
-        i:hover {
-            /* Start the shake animation and make the animation last for 0.5 seconds */
-            animation: shake 0.1s;
-
-            /* When the animation is finished, start again */
-            animation-iteration-count: 1;
-        }
-
-        @keyframes shake {
-            0% { transform: translate(1px, 1px) rotate(0deg); }
-            10% { transform: translate(-1px, -2px) rotate(-1deg); }
-            20% { transform: translate(-3px, 0px) rotate(1deg); }
-            30% { transform: translate(3px, 2px) rotate(0deg); }
-            40% { transform: translate(1px, -1px) rotate(1deg); }
-            50% { transform: translate(-1px, 2px) rotate(-1deg); }
-            60% { transform: translate(-3px, 1px) rotate(0deg); }
-            70% { transform: translate(3px, 1px) rotate(-1deg); }
-            80% { transform: translate(-1px, -1px) rotate(1deg); }
-            90% { transform: translate(1px, 2px) rotate(0deg); }
-            100% { transform: translate(1px, -2px) rotate(-1deg); }
-        }
-    </style>
+    <link rel="stylesheet" href="index-style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 <body>
     <header>
@@ -88,7 +11,7 @@
             <ul>
                 <li><a href="#about"><i class="fa fa-user"></i> About</a></li>
                 <li><a href="#publications"><i class="fa fa-book"></i> Publications</a></li>
-                <li><a href="#projects"><i class="fa fa-folder-open"></i> Projects</a></li>
+                <li><a href="#blog-post"><i class="fa fa-folder-open"></i> Blog Posts</a></li>
                 <li><a href="#contact"><i class="fa fa-envelope"></i> Contact</a></li>
             </ul>
         </nav>
@@ -98,16 +21,41 @@
         <h2>About</h2>
         <p>Lorem ipsum</p>
     </section>
+    <!--K. Y. Gan, Y. T. Cheng, H. -K. Tan, H. -F. Ng, M. K. Leung and J. H. Chuah, "Contrastive-Regularized U-Net for Video Anomaly Detection," in IEEE Access, vol. 11, pp. 36658-36671, 2023, doi: 10.1109/ACCESS.2023.3266345.-->
     
     <section id="publications">
+        <!-- Two sections, first author and co author with drop down-->
         <h2>Publications</h2>
+        <details>
+            <summary>First Author</summary>
+            <div>
+                <div>
+                    <ul>
+                        <li>Coming Soon</li>
+                    </ul>
+                </div>
+            </div>
+        </details>
+        <details>
+            <summary>Co-Author</summary>
+            <div>
+                <div>
+                    <ul>
+                        <li>K. Y. Gan, Y. T. Cheng, H. -K. Tan, H. -F. Ng, M. K. Leung and J. H. Chuah, "Contrastive-Regularized U-Net for Video Anomaly Detection," in IEEE Access, vol. 11, pp. 36658-36671, 2023, doi: 10.1109/ACCESS.2023.3266345.</li>
+                    </ul>
+                </div>
+            </div>
+        </details>
+
     </section>
-    
-    <section id="projects">
-        <h2>Projects</h2>
-    </section>
-    
-    <section id="fun-projects">
+
+    <section id="blog-post">
+        <h2>Blog Posts</h2>
+        <ul>
+            <li>
+                14 Jan 2024:
+            <a link href="blogs/14-Jan-2024/14-Jan-2024.html">Revolutionizing Content Creation (AI-generated)</a></li>
+        </ul>
     </section>
     
     <section id="contact" style="text-align: center;">
@@ -118,24 +66,11 @@
             <a href="https://github.com/tobycyt" style="margin-right: 10px; color: black;"><i class="fa fa-github" style="font-size: 50px;"></i></a>
             <a href="https://www.linkedin.com/in/yu-tong-cheng-2ba294206/" style="margin-right: 10px; color: black;"><i class="fa fa-linkedin" style="font-size: 50px;"></i></a>
         </div>
-
     </section>
     
     <footer>
         <p>&copy; 2024 Cheng Yu Tong. All rights reserved.</p>
     </footer>
-
-    <script>
-        // Add JavaScript code to handle smooth scrolling animation
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-
-                document.querySelector(this.getAttribute('href')).scrollIntoView({
-                    behavior: 'smooth'
-                });
-            });
-        });
-    </script>
+    <script src="index-script.js"></script>
 </body>
 </html>

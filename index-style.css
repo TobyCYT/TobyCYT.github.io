@@ -1,0 +1,128 @@
+html {
+    scroll-behavior: smooth;
+    animation: fadeIn 1s ease-in-out;
+}
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+header {
+    background-color: #333;
+    color: #fff;
+    padding: 20px;
+    text-align: center;
+}
+
+ul{
+    padding-left: 0;
+    list-style-type: none;
+}
+
+nav ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+}
+
+nav ul li {
+    margin: 0 10px;
+}
+
+nav ul li a {
+    color: #fff;
+    text-decoration: none;
+}
+
+section {
+    padding: 50px;
+    text-align: center;
+}
+
+footer {
+    background-color: #333;
+    color: #fff;
+    padding: 20px;
+    text-align: center;
+}
+
+.sidebar {
+    background-color: #f1f1f1;
+    width: 200px;
+    padding: 20px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100%;
+}
+
+i:hover {
+    /* Start the shake animation and make the animation last for 0.5 seconds */
+    animation: shake 0.1s;
+
+    /* When the animation is finished, start again */
+    animation-iteration-count: 1;
+}
+
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes shake {
+    0% { transform: translate(1px, 1px) rotate(0deg); }
+    10% { transform: translate(-1px, -2px) rotate(-1deg); }
+    20% { transform: translate(-3px, 0px) rotate(1deg); }
+    30% { transform: translate(3px, 2px) rotate(0deg); }
+    40% { transform: translate(1px, -1px) rotate(1deg); }
+    50% { transform: translate(-1px, 2px) rotate(-1deg); }
+    60% { transform: translate(-3px, 1px) rotate(0deg); }
+    70% { transform: translate(3px, 1px) rotate(-1deg); }
+    80% { transform: translate(-1px, -1px) rotate(1deg); }
+    90% { transform: translate(1px, 2px) rotate(0deg); }
+    100% { transform: translate(1px, -2px) rotate(-1deg); }
+}
+
+details {
+    cursor: pointer;
+}
+
+details > div {
+    overflow: hidden;
+    display: grid;
+    /* intentionally independent from .animation as Safari 16
+    would otherwise ignore the expansion animation. */
+    animation-duration: 0.5s;
+}
+
+details > .animation {
+    animation-name: grid-expand;
+    animation-timing-function: ease-out;
+}
+
+details > .collapsing {
+    animation-direction: reverse;
+    animation-timing-function: ease-in;
+}
+
+details > div > div {
+    min-height: 0;
+}
+
+@keyframes grid-expand {
+    0% {
+        grid-template-rows: 0fr;
+    }
+    100% {
+        grid-template-rows: 1fr;
+    }
+}
