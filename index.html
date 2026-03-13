@@ -151,28 +151,20 @@
             // Responsive Scaling: Strictly bound to width capacity
             function updateScale() {
                 const screenWidth = window.innerWidth;
+                const screenHeight = window.innerHeight;
                 
                 const vFOV = THREE.MathUtils.degToRad(camera.fov); 
                 const visibleHeight = 2 * Math.tan(vFOV / 2) * 350;
                 const visibleWidth = visibleHeight * camera.aspect;
 
-                // Base text width calculation
-                let targetScale = (visibleWidth * 0.8) / textWidth;
+                // Use 95% width on mobile for maximum space, 90% on desktop
+                const margin = screenWidth < 768 ? 0.95 : 0.90;
                 
-                // Add explicit mobile clamp:
-                // Now that the iOS viewport is reporting correctly (thanks to the meta tag), 
-                // the aspect ratio pushes the boundary harder. We force a hard limit on low widths.
-                if (screenWidth < 768) {
-                    // Force the 3D Text to NEVER exceed 85% of whatever visible width is provided
-                    targetScale = (visibleWidth * 0.85) / textWidth;
-                    
-                    // Further, to protect against extreme vertical phone aspect ratios squishing the FOV,
-                    // we put a hard mathematical ceiling on the raw Threejs group scale purely for mobiles.
-                    if (targetScale > 0.4) targetScale = 0.4;
-                } else {
-                    // Aesthetic cap for desktops/laptops so it doesn't get ridiculously large
-                    if (targetScale > 1.0) targetScale = 1.0; 
-                }
+                // Maximum safely allowed scale based on the strict physical width boundaries right now
+                let safeMaxScale = (visibleWidth * margin) / textWidth;
+
+                // Cap the maximum size so it doesn't get infinitely huge on ultrawide screens
+                let targetScale = Math.min(0.8, safeMaxScale);
                 
                 group.scale.set(targetScale, targetScale, targetScale);
             }
