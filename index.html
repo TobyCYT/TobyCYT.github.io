@@ -149,11 +149,9 @@
             // Responsive Scaling: Adjust scale so text fits inside the screen nicely
             function updateScale() {
                 const screenWidth = window.innerWidth;
+                const screenHeight = window.innerHeight; // Take height into account for aspect ratio fixes
                 
-                // Three.js world units to screen pixels ratio approx
-                // We calculate a mathematical bound scaling size based solely on the current screen size
                 let maxSafeWidth = screenWidth * 0.90; 
-                
                 let targetScale = (maxSafeWidth / textWidth) * 0.40;
                 
                 // Set strict ceilings based on device width to avoid it getting too large
@@ -162,12 +160,20 @@
                 } else if (screenWidth >= 768) {
                     if (targetScale > 0.70) targetScale = 0.70;
                 } else {
-                    // Safari iOS strict bounding: Device pixel density (retina) and fov on mobile portrait 
-                    // makes the visual frustum much tighter than it reports. We need to explicitly lower the ratio even further.
-                    // Scale it relative to logical width, but use a much smaller multiplier (0.28 instead of 0.40/0.45)
-                    targetScale = (screenWidth / textWidth) * 0.28;
-                    // Cap it exceptionally low for small iPhones (SE, mini)
-                    if (targetScale > 0.35) targetScale = 0.35; 
+                    // ** Safari iOS Strict Fix **: 
+                    // When in portrait mode, fov scaling gets extremely cramped.
+                    // We must calculate based on the *aspect ratio*, not just screenWidth.
+                    let aspect = screenWidth / screenHeight;
+                    
+                    // The narrower the phone (lower aspect ratio), the more forcefully we shrink it
+                    if (aspect < 1.0) {
+                        targetScale = (screenWidth / textWidth) * (aspect * 0.5); // Drastic reduction for portrait phones
+                    } else {
+                        targetScale = (screenWidth / textWidth) * 0.3; // Landscape phones
+                    }
+
+                    // Absolute hard cap so it *cannot* exceed standard visual bounds in any situation on mobile
+                    if (targetScale > 0.25) targetScale = 0.25; 
                 }
                 
                 group.scale.set(targetScale, targetScale, targetScale);
@@ -225,26 +231,54 @@
                 mouseY = -(event.clientY / window.innerHeight) * 2 + 1;
             });
 
-            // Gyroscope interaction for mobile devices
-            window.addEventListener('deviceorientation', (event) => {
-                // Return if the device does not have gyroscope hardware
-                if (event.gamma === null || event.beta === null) return;
-                
-                // gamma: left-to-right tilt (-90 to 90)
-                // beta: front-to-back tilt (-180 to 180)
-                let xTilt = event.gamma;
-                
-                // Offset beta by 45 degrees since users naturally hold their phones tilted slightly towards them
-                let yTilt = event.beta - 45; 
+            // Gyroscope interaction for mobile devices (requires user permission on modern iOS Safari)
+            // To make this work smoothly on iOS 13+, we must add a fallback interaction listener or request permission.
+            // As a basic integration, we bind DeviceOrientation directly, but add a fallback touch listener so "dragging"
+            // the screen on phone manually rotates the text if the Gyroscope is blocked.
+            
+            let isTouching = false;
+            let lastTouchX = 0;
+            let lastTouchY = 0;
 
-                // Clamp limits to +/- 30 degrees to prevent the text from spinning completely backward
-                xTilt = Math.max(-30, Math.min(30, xTilt));
-                yTilt = Math.max(-30, Math.min(30, yTilt));
+            document.addEventListener('touchstart', (e) => {
+                isTouching = true;
+                lastTouchX = e.touches[0].clientX;
+                lastTouchY = e.touches[0].clientY;
+            }, {passive: true});
 
-                // Map tilt degrees to the identical -1 to 1 ratio used by the mouse logic
-                mouseX = xTilt / 30;
-                mouseY = -(yTilt / 30); // Inverted so pivoting forward aims rotation upward
+            document.addEventListener('touchmove', (e) => {
+                if (!isTouching) return;
+                
+                // Allow users to rotate text by dragging their finger if Gyro is locked
+                mouseX = (e.touches[0].clientX / window.innerWidth) * 2 - 1;
+                mouseY = -(e.touches[0].clientY / window.innerHeight) * 2 + 1;
+            }, {passive: true});
+
+            document.addEventListener('touchend', () => {
+                isTouching = false;
+                // Optional: Snap back to center
+                // mouseX = 0; mouseY = 0;
             });
+
+            // Native Gyroscope Listeners (Will silently fail on iOS unless secure origin and specific user prompt is triggered,
+            // hence the touch fallback added above).
+            if (window.DeviceOrientationEvent) {
+                window.addEventListener('deviceorientation', (event) => {
+                    if (event.gamma === null || event.beta === null) return;
+                    
+                    let xTilt = event.gamma;
+                    // Standardize orientation limits
+                    let yTilt = event.beta; 
+                    
+                    // Clamp
+                    xTilt = Math.max(-45, Math.min(45, xTilt));
+                    yTilt = Math.max(-45, Math.min(45, yTilt));
+
+                    // Normalize to Threejs angles
+                    mouseX = xTilt / 45;
+                    mouseY = -(yTilt / 45); 
+                });
+            }
 
             function animate() {
                 requestAnimationFrame(animate);
