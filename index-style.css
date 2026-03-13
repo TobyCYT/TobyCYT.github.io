@@ -33,6 +33,7 @@ body {
     display: flex;
     justify-content: center;
     gap: 40px;
+    flex-wrap: wrap; /* Allow wrapping on very tight mobile screens */
 }
 
 .main-nav ul li a {
@@ -43,6 +44,32 @@ body {
     letter-spacing: 1px;
     text-transform: uppercase;
     transition: color 0.3s ease;
+    padding: 10px; /* Add some clickable area for mobile */
+}
+
+/* Mobile Adjustments */
+@media (max-width: 768px) {
+    .main-nav ul {
+        gap: 15px; /* Decrease massive gap separating tabs */
+        padding: 15px 10px;
+    }
+    
+    .main-nav ul li a {
+        font-size: 13px; /* Ensure readability */
+        padding: 5px;    
+    }
+    
+    .content-wrapper {
+        padding: 0 20px; /* Give mobile text more breathing room */
+    }
+    
+    h2 {
+        font-size: 2rem;
+    }
+    
+    .lead-text {
+        font-size: 1.2rem;
+    }
 }
 
 .main-nav ul li a:hover {
