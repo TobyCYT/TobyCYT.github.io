@@ -102,11 +102,11 @@
         const scene = new THREE.Scene();
         
         // Adjust camera for a full screen hero area
-        const camera = new THREE.PerspectiveCamera(40, container.clientWidth / container.clientHeight, 1, 1000);
+        const camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 1, 1000);
         camera.position.set(0, 0, 350);
 
         const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-        renderer.setSize(container.clientWidth, container.clientHeight);
+        renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.setPixelRatio(window.devicePixelRatio);
         container.appendChild(renderer.domElement);
 
@@ -137,9 +137,46 @@
                 bevelEnabled: true, bevelThickness: 1, bevelSize: 0.5, bevelOffset: 0, bevelSegments: 3
             });
             fullGeometry.computeBoundingBox();
-            const xOffset = -0.5 * (fullGeometry.boundingBox.max.x - fullGeometry.boundingBox.min.x);
-            const yOffset = -0.5 * (fullGeometry.boundingBox.max.y - fullGeometry.boundingBox.min.y);
-            group.position.set(xOffset, yOffset, 0);
+            
+            // To ensure perfect centering regardless of scale, we translate the geometry itself so its origin is dead center
+            const xOffset = -0.5 * (fullGeometry.boundingBox.max.x - fullGeometry.boundingBox.min.x) - fullGeometry.boundingBox.min.x;
+            const yOffset = -0.5 * (fullGeometry.boundingBox.max.y - fullGeometry.boundingBox.min.y) - fullGeometry.boundingBox.min.y;
+            
+            // We'll store the total width for scaling math, but we don't offset the group position anymore
+            const textWidth = fullGeometry.boundingBox.max.x - fullGeometry.boundingBox.min.x;
+            group.position.set(0, 0, 0); // Keep group exactly at world center
+
+            // Responsive Scaling: Adjust scale so text fits inside the screen nicely
+            function updateScale() {
+                const screenWidth = window.innerWidth;
+                
+                // Three.js world units to screen pixels ratio approx
+                // We calculate a mathematical bound scaling size based solely on the current screen size
+                // We keep it much smaller so it never hits the edges at all.
+                let maxSafeWidth = screenWidth * 0.90; // The pixel width the text is allowed to take up visual space
+                
+                // The base scale based strictly on the text 3D bounds versus the logical container width
+                let targetScale = (maxSafeWidth / textWidth) * 0.40;
+                
+                // Set strict ceilings based on device width to avoid it getting too large
+                if (screenWidth >= 1024) {
+                    // Desktop limit -> smaller visual footprint
+                    if (targetScale > 0.85) targetScale = 0.85; 
+                } else if (screenWidth >= 768) {
+                    // Tablet limit
+                    if (targetScale > 0.70) targetScale = 0.70;
+                } else {
+                    // Mobile limit -> Allow relative width but strictly bound it down
+                    if (targetScale > 0.45) targetScale = 0.45; // Aggressive cap for very small screens so it never bleeds
+                }
+                
+                group.scale.set(targetScale, targetScale, targetScale);
+            }
+            
+            // Set initial scale
+            updateScale();
+            // Hook up into the external resize listener so it actively fires when user drags window
+            resizeCallback = updateScale;
 
             const material = new THREE.MeshPhongMaterial({ 
                 color: 0xE0E0E0, 
@@ -163,6 +200,11 @@
                     font: font, size: 24, height: 6, curveSegments: 12,
                     bevelEnabled: true, bevelThickness: 1, bevelSize: 0.5, bevelOffset: 0, bevelSegments: 3
                 });
+                
+                // IMPORTANT: Translate the generated slice of geometry using the EXACT same offset 
+                // computed for the full text. This forces the typed-out letters to anchor to the center!
+                geometry.translate(xOffset, yOffset, 0);
+
                 textMesh = new THREE.Mesh(geometry, material);
                 group.add(textMesh);
 
@@ -187,8 +229,8 @@
                 requestAnimationFrame(animate);
                 
                 const time = Date.now() * 0.001;
-                // Idle floating (applying to the whole group instead)
-                group.position.y = yOffset + Math.sin(time * 2) * 5; 
+                // Idle floating (applying only to the Y axis relative to center)
+                group.position.y = Math.sin(time * 2) * 5; 
                 
                 // Mouse interaction rotation
                 group.rotation.x += (mouseY * 0.3 - group.rotation.x) * 0.1;
@@ -199,12 +241,22 @@
             animate();
         });
 
+        // Outside the loader, we need logic to communicate resize to the group
+        let resizeCallback = null;
+
         // Handle Window Resize
         window.addEventListener('resize', () => {
             if (!container) return;
-            camera.aspect = container.clientWidth / container.clientHeight;
+
+            // Recalculate aspect ratio
+            camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
-            renderer.setSize(container.clientWidth, container.clientHeight);
+
+            // Resize the renderer layout
+            renderer.setSize(window.innerWidth, window.innerHeight);
+
+            // Execute the dynamically bound scale function
+            if(typeof resizeCallback === 'function') resizeCallback();
         });
     </script>
 
