@@ -157,13 +157,23 @@
             // Responsive Scaling: Strictly bound to width capacity
             function updateScale() {
                 const screenWidth = window.innerWidth;
-                const screenHeight = window.innerHeight;
                 
+                // On mobile, lock the horizontal field of view so vertical height changes don't crush the text scale
+                if (screenWidth < 768) {
+                    // 40 degrees horizontal FOV gives a solid consistent dimension purely based on width
+                    const hFov = THREE.MathUtils.degToRad(40); 
+                    const vFov = 2 * Math.atan(Math.tan(hFov / 2) / camera.aspect);
+                    camera.fov = THREE.MathUtils.radToDeg(vFov);
+                } else {
+                    camera.fov = 40; // Ensure it stays at 40 on desktop
+                }
+                camera.updateProjectionMatrix();
+
                 const vFOV = THREE.MathUtils.degToRad(camera.fov); 
                 const visibleHeight = 2 * Math.tan(vFOV / 2) * 350;
                 const visibleWidth = visibleHeight * camera.aspect;
 
-                // Use 95% width on mobile for maximum space, 90% on desktop
+                // Use 95% boundary width on mobile, 90% boundary on desktop
                 const margin = screenWidth < 768 ? 0.95 : 0.90;
                 
                 // Maximum safely allowed scale based on the strict physical width boundaries right now
