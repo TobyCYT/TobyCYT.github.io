@@ -152,22 +152,22 @@
                 
                 // Three.js world units to screen pixels ratio approx
                 // We calculate a mathematical bound scaling size based solely on the current screen size
-                // We keep it much smaller so it never hits the edges at all.
-                let maxSafeWidth = screenWidth * 0.90; // The pixel width the text is allowed to take up visual space
+                let maxSafeWidth = screenWidth * 0.90; 
                 
-                // The base scale based strictly on the text 3D bounds versus the logical container width
                 let targetScale = (maxSafeWidth / textWidth) * 0.40;
                 
                 // Set strict ceilings based on device width to avoid it getting too large
                 if (screenWidth >= 1024) {
-                    // Desktop limit -> smaller visual footprint
                     if (targetScale > 0.85) targetScale = 0.85; 
                 } else if (screenWidth >= 768) {
-                    // Tablet limit
                     if (targetScale > 0.70) targetScale = 0.70;
                 } else {
-                    // Mobile limit -> Allow relative width but strictly bound it down
-                    if (targetScale > 0.45) targetScale = 0.45; // Aggressive cap for very small screens so it never bleeds
+                    // Safari iOS strict bounding: Device pixel density (retina) and fov on mobile portrait 
+                    // makes the visual frustum much tighter than it reports. We need to explicitly lower the ratio even further.
+                    // Scale it relative to logical width, but use a much smaller multiplier (0.28 instead of 0.40/0.45)
+                    targetScale = (screenWidth / textWidth) * 0.28;
+                    // Cap it exceptionally low for small iPhones (SE, mini)
+                    if (targetScale > 0.35) targetScale = 0.35; 
                 }
                 
                 group.scale.set(targetScale, targetScale, targetScale);
@@ -223,6 +223,27 @@
             document.addEventListener('mousemove', (event) => {
                 mouseX = (event.clientX / window.innerWidth) * 2 - 1;
                 mouseY = -(event.clientY / window.innerHeight) * 2 + 1;
+            });
+
+            // Gyroscope interaction for mobile devices
+            window.addEventListener('deviceorientation', (event) => {
+                // Return if the device does not have gyroscope hardware
+                if (event.gamma === null || event.beta === null) return;
+                
+                // gamma: left-to-right tilt (-90 to 90)
+                // beta: front-to-back tilt (-180 to 180)
+                let xTilt = event.gamma;
+                
+                // Offset beta by 45 degrees since users naturally hold their phones tilted slightly towards them
+                let yTilt = event.beta - 45; 
+
+                // Clamp limits to +/- 30 degrees to prevent the text from spinning completely backward
+                xTilt = Math.max(-30, Math.min(30, xTilt));
+                yTilt = Math.max(-30, Math.min(30, yTilt));
+
+                // Map tilt degrees to the identical -1 to 1 ratio used by the mouse logic
+                mouseX = xTilt / 30;
+                mouseY = -(yTilt / 30); // Inverted so pivoting forward aims rotation upward
             });
 
             function animate() {
