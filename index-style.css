@@ -26,7 +26,27 @@ body {
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-.main-nav ul {
+/* Burger Menu Hidden on Desktop */
+.burger-menu {
+    display: none;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 15px 20px;
+    z-index: 1001; /* Above dropdown */
+    flex-direction: column;
+    gap: 5px;
+}
+
+.burger-bar {
+    display: block;
+    width: 25px;
+    height: 2px;
+    background-color: #A0A0A0;
+    transition: all 0.3s ease;
+}
+
+.main-nav ul.nav-links {
     list-style-type: none;
     margin: 0;
     padding: 20px 0;
@@ -36,7 +56,7 @@ body {
     flex-wrap: wrap; /* Allow wrapping on very tight mobile screens */
 }
 
-.main-nav ul li a {
+.main-nav ul.nav-links li a {
     color: #A0A0A0;
     text-decoration: none;
     font-size: 14px;
@@ -47,16 +67,71 @@ body {
     padding: 10px; /* Add some clickable area for mobile */
 }
 
+.main-nav ul.nav-links li a:hover {
+    color: #FFFFFF;
+}
+
 /* Mobile Adjustments */
 @media (max-width: 768px) {
-    .main-nav ul {
-        gap: 15px; /* Decrease massive gap separating tabs */
-        padding: 15px 10px;
+    /* Ensure Nav container has physical height for absolute elements and backdrop filter */
+    .main-nav {
+        display: flex;
+        height: 60px;
+        align-items: center;
+    }
+
+    /* Show Hamburger on the Left */
+    .burger-menu {
+        display: flex;
+        position: relative;
+        left: 0;
+        justify-content: center;
+    }
+
+    /* Hide full navigation by default, build vertical mobile menu */
+    .main-nav ul.nav-links {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        position: absolute;
+        top: 100%; /* Dropdown below the nav bar */
+        left: 0;
+        width: 100%;
+        background: rgba(12, 12, 12, 0.95);
+        backdrop-filter: blur(15px);
+        gap: 0;
+        padding: 0;
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.4s ease-out; /* Smooth slide down */
     }
     
-    .main-nav ul li a {
-        font-size: 13px; /* Ensure readability */
-        padding: 5px;    
+    .main-nav ul.nav-links.nav-active {
+        max-height: 400px; /* Big enough to fit links */
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    
+    .main-nav ul.nav-links li {
+        width: 100%;
+        text-align: center;
+    }
+    
+    .main-nav ul.nav-links li a {
+        display: block;
+        font-size: 15px; 
+        padding: 20px 0;    
+        border-bottom: 1px solid rgba(255,255,255,0.03);
+    }
+
+    /* Hamburger Animation to 'X' */
+    .burger-menu.toggle .burger-bar:nth-child(1) {
+        transform: rotate(-45deg) translate(-5px, 5px);
+    }
+    .burger-menu.toggle .burger-bar:nth-child(2) {
+        opacity: 0;
+    }
+    .burger-menu.toggle .burger-bar:nth-child(3) {
+        transform: rotate(45deg) translate(-5px, -5px);
     }
     
     .content-wrapper {
@@ -72,9 +147,6 @@ body {
     }
 }
 
-.main-nav ul li a:hover {
-    color: #FFFFFF;
-}
 
 /* Hero Section */
 .hero-section {

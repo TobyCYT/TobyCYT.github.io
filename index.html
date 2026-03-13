@@ -18,7 +18,13 @@
 <body>
     <!-- Sleek Glassmorphism Navigation -->
     <nav class="main-nav">
-        <ul>
+        <!-- Hamburger Menu Toggle (Mobile) -->
+        <button class="burger-menu" aria-label="Toggle navigation">
+            <span class="burger-bar"></span>
+            <span class="burger-bar"></span>
+            <span class="burger-bar"></span>
+        </button>
+        <ul class="nav-links">
             <li><a href="#hero">Home</a></li>
             <li><a href="#about">About</a></li>
             <li><a href="#publications">Publications</a></li>
@@ -308,6 +314,30 @@
     <!-- Scroll Animations -->
     <script>
         document.addEventListener("DOMContentLoaded", function() {
+            // Hamburger Menu Logic
+            const burger = document.querySelector('.burger-menu');
+            const nav = document.querySelector('.nav-links');
+            const navLinks = document.querySelectorAll('.nav-links li');
+
+            if (burger && nav) {
+                burger.addEventListener('click', () => {
+                    // Toggle Nav
+                    nav.classList.toggle('nav-active');
+                    
+                    // Burger Animation
+                    burger.classList.toggle('toggle');
+                });
+
+                // Close menu when a link is clicked
+                navLinks.forEach(link => {
+                    link.addEventListener('click', () => {
+                        nav.classList.remove('nav-active');
+                        burger.classList.remove('toggle');
+                    });
+                });
+            }
+
+            // Scroll Observer (Fade In)
             const observer = new IntersectionObserver((entries) => {
                 entries.forEach((entry) => {
                     if (entry.isIntersecting) {
