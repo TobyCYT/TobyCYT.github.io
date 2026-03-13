@@ -304,10 +304,20 @@
 
         // Outside the loader, we need logic to communicate resize to the group
         let resizeCallback = null;
+        let lastWidth = window.innerWidth;
 
         // Handle Window Resize
         window.addEventListener('resize', () => {
             if (!container) return;
+
+            const currentWidth = window.innerWidth;
+
+            // On mobile devices, scrolling causes the URL bar to hide/show, which triggers continuous
+            // resize events and causes massive 3D stutters. If only the height changed on a phone, ignore it!
+            if (currentWidth < 768 && currentWidth === lastWidth) {
+                return; 
+            }
+            lastWidth = currentWidth;
 
             // Recalculate aspect ratio
             camera.aspect = window.innerWidth / window.innerHeight;
