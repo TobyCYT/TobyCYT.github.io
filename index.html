@@ -152,24 +152,27 @@
             function updateScale() {
                 const screenWidth = window.innerWidth;
                 
-                // Set fixed camera frustum unit width boundaries
-                // The PerspectiveCamera (fov 40) handles scaling automatically on resize, but when the width
-                // narrows, the visual bounds squeeze inward. We want the text to always take up roughly 80% 
-                // of whatever the physical screen width is, regardless of height.
-                
-                // Get the camera's visible frustum width at the z-depth (0) where our text lives
-                // Camera is at z=350. Text is at z=0. Distance = 350.
                 const vFOV = THREE.MathUtils.degToRad(camera.fov); 
                 const visibleHeight = 2 * Math.tan(vFOV / 2) * 350;
                 const visibleWidth = visibleHeight * camera.aspect;
 
-                // We want the text to occupy 80% of the calculated visible 3D width.
-                // Because we know exact textWidth in 3D units, the math is absolute!
+                // Base text width calculation
                 let targetScale = (visibleWidth * 0.8) / textWidth;
                 
-                // Purely aesthetic caps so it doesn't get ridiculously large on giant UltraWide monitors
-                // or shrink completely out of readibility on ancient phones.
-                if (targetScale > 1.0) targetScale = 1.0; 
+                // Add explicit mobile clamp:
+                // Now that the iOS viewport is reporting correctly (thanks to the meta tag), 
+                // the aspect ratio pushes the boundary harder. We force a hard limit on low widths.
+                if (screenWidth < 768) {
+                    // Force the 3D Text to NEVER exceed 85% of whatever visible width is provided
+                    targetScale = (visibleWidth * 0.85) / textWidth;
+                    
+                    // Further, to protect against extreme vertical phone aspect ratios squishing the FOV,
+                    // we put a hard mathematical ceiling on the raw Threejs group scale purely for mobiles.
+                    if (targetScale > 0.4) targetScale = 0.4;
+                } else {
+                    // Aesthetic cap for desktops/laptops so it doesn't get ridiculously large
+                    if (targetScale > 1.0) targetScale = 1.0; 
+                }
                 
                 group.scale.set(targetScale, targetScale, targetScale);
             }
