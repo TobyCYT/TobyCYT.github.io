@@ -146,35 +146,28 @@
             const textWidth = fullGeometry.boundingBox.max.x - fullGeometry.boundingBox.min.x;
             group.position.set(0, 0, 0); // Keep group exactly at world center
 
-            // Responsive Scaling: Adjust scale so text fits inside the screen nicely
+            // Responsive Scaling: Strictly bound to width capacity
             function updateScale() {
                 const screenWidth = window.innerWidth;
-                const screenHeight = window.innerHeight; // Take height into account for aspect ratio fixes
                 
-                let maxSafeWidth = screenWidth * 0.90; 
-                let targetScale = (maxSafeWidth / textWidth) * 0.40;
+                // Set fixed camera frustum unit width boundaries
+                // The PerspectiveCamera (fov 40) handles scaling automatically on resize, but when the width
+                // narrows, the visual bounds squeeze inward. We want the text to always take up roughly 80% 
+                // of whatever the physical screen width is, regardless of height.
                 
-                // Set strict ceilings based on device width to avoid it getting too large
-                if (screenWidth >= 1024) {
-                    if (targetScale > 0.85) targetScale = 0.85; 
-                } else if (screenWidth >= 768) {
-                    if (targetScale > 0.70) targetScale = 0.70;
-                } else {
-                    // ** Safari iOS Strict Fix **: 
-                    // When in portrait mode, fov scaling gets extremely cramped.
-                    // We must calculate based on the *aspect ratio*, not just screenWidth.
-                    let aspect = screenWidth / screenHeight;
-                    
-                    // The narrower the phone (lower aspect ratio), the more forcefully we shrink it
-                    if (aspect < 1.0) {
-                        targetScale = (screenWidth / textWidth) * (aspect * 0.5); // Drastic reduction for portrait phones
-                    } else {
-                        targetScale = (screenWidth / textWidth) * 0.3; // Landscape phones
-                    }
+                // Get the camera's visible frustum width at the z-depth (0) where our text lives
+                // Camera is at z=350. Text is at z=0. Distance = 350.
+                const vFOV = THREE.MathUtils.degToRad(camera.fov); 
+                const visibleHeight = 2 * Math.tan(vFOV / 2) * 350;
+                const visibleWidth = visibleHeight * camera.aspect;
 
-                    // Absolute hard cap so it *cannot* exceed standard visual bounds in any situation on mobile
-                    if (targetScale > 0.25) targetScale = 0.25; 
-                }
+                // We want the text to occupy 80% of the calculated visible 3D width.
+                // Because we know exact textWidth in 3D units, the math is absolute!
+                let targetScale = (visibleWidth * 0.8) / textWidth;
+                
+                // Purely aesthetic caps so it doesn't get ridiculously large on giant UltraWide monitors
+                // or shrink completely out of readibility on ancient phones.
+                if (targetScale > 1.0) targetScale = 1.0; 
                 
                 group.scale.set(targetScale, targetScale, targetScale);
             }
