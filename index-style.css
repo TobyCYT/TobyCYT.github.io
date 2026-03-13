@@ -1,11 +1,27 @@
 html {
     scroll-behavior: smooth;
-    animation: fadeIn 1s ease-in-out;
+    animation: fadeIn 0.5s ease-in-out;
 }
 body {
     font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
+}
+
+#about {
+    animation: fadeIn 0.7s ease-in-out;
+}
+
+#publications {
+    animation: fadeIn 0.9s ease-in-out;
+}
+
+#blog-post {
+    animation: fadeIn 1.1s ease-in-out;
+}
+
+#contact {
+    animation: fadeIn 1.3s ease-in-out;
 }
 
 header {
@@ -29,7 +45,13 @@ nav ul {
 }
 
 nav ul li {
-    margin: 0 10px;
+    margin: 0 20px;
+}
+
+nav ul li:hover {
+    animation: shake 0.1s;
+
+    animation-iteration-count: 1;
 }
 
 nav ul li a {
@@ -49,17 +71,7 @@ footer {
     text-align: center;
 }
 
-.sidebar {
-    background-color: #f1f1f1;
-    width: 200px;
-    padding: 20px;
-    position: fixed;
-    top: 0;
-    left: 0;
-    height: 100%;
-}
-
-i:hover {
+#contact i:hover {
     /* Start the shake animation and make the animation last for 0.5 seconds */
     animation: shake 0.1s;
 
